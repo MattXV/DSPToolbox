@@ -13,6 +13,7 @@
 namespace dsptb {
     std::unique_ptr<FilterBank> filterBank;
 
+    extern std::string currentLogs;
     bool dsptbInitOK = false;
 }
 

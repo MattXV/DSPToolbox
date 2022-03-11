@@ -3,6 +3,7 @@
 namespace dsptb {
     std::string dsptb_error = std::string();
     std::stringstream dsptb_logs = std::stringstream();
+    std::string currentLogs = std::string();
     dsptbSETTINGS settings;
 }
 
@@ -48,7 +49,24 @@ extern "C" {
 
     }
 
-    int dsptbSetFrequencyDependentIRs(float* data, int length, int dsptb_erb_band) {
+    const char* dsptbGetError(void) {
+        return dsptb::dsptb_error.c_str();
+    }
+    void dsptbClearLogs(void) {
+        dsptb::dsptb_logs.clear();
+        dsptb::currentLogs.clear();
+    }
+    void dsptbClearError(void) {
+        dsptb::dsptb_error.clear();
+    }
+
+
+    const char* dsptbGetLogs(void) {
+        dsptb::currentLogs = dsptb::dsptb_logs.str();
+        return dsptb::currentLogs.c_str();
+    }
+
+    int dsptbSetFrequencyDependentIRs(const float* data, int length, int dsptb_erb_band) {
         if (!dsptb::dsptbInitOK) {
             DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbSetFrequencyDependentIRs.");
             return DSPTB_FAILURE;
@@ -68,7 +86,23 @@ extern "C" {
 
         dsptb::signal ir = dsptb::signal(data, data + length);
         dsptb::filterBank->setFrequencyDependentIRs(ir, static_cast<DSPTB_ERB_BAND>(dsptb_erb_band));
+        DSPTB_LOG("Set Frequency-dependent ir. ERB band: " << dsptb_erb_band << " length: " << length << " \n");
+        return DSPTB_SUCCESS;
+    }
 
+    int dsptbGetIR(const float** data, int* len) {
+        if (!dsptb::dsptbInitOK) {
+            DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbGetIR.");
+            return DSPTB_FAILURE;
+        }
+        const dsptb::signal& ir = dsptb::filterBank->getIR();
+        if (ir.size() == 0) {
+            DSPTB_ERROR("IR not generated. Aborting dsptbGetIR.");
+            return DSPTB_FAILURE;
+        }
+
+        *data = ir.data();
+        *len = ir.size();
         return DSPTB_SUCCESS;
     }
 
@@ -81,8 +115,5 @@ extern "C" {
         int ok = dsptb::filterBank->generateIR();
         return ok;
     }
-
-    
-
 
 }

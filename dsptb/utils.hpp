@@ -5,6 +5,8 @@
 #include <dsptb.h>
 #include <vector>
 #include <string>
+#include <sstream>
+#include <iostream>
 
 #define DISABLE_COPY_ASSIGN(Class) \
     Class(const Class&) = delete; \
@@ -12,7 +14,7 @@
 
 #ifndef NDEBUG
     #define DSPTB_ERROR(String) do { DSPTB_SetError(String); } while (0)
-    #define DSPTB_LOG(Message)  do { std::stringstream log; log << Message; std::cout << log.str() << std::endl; ASR_Log(log.str().c_str()); } while (0)
+    #define DSPTB_LOG(Message)  do { std::stringstream log; log << Message; std::cout << log.str() << std::endl; DSPTB_Log(log.str().c_str()); } while (0)
 #else
     #define DSPTB_ERROR(Message)    do {} while (0)
     #define DSPTB_LOG(Message)      do {} while (0)
@@ -27,7 +29,6 @@ void DSPTB_Log(const std::string& log);
 namespace dsptb {
 
     extern dsptbSETTINGS settings;
-    extern std::string asr_error;
     typedef float sample;
     typedef std::vector<sample> signal;
     constexpr float pi = 3.141592653589793f;

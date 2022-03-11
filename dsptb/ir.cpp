@@ -10,17 +10,9 @@ namespace dsptb {
         filter_4000(Filter::filterType::LPF, 20000.0f)
     { }
     int FilterBank::generateIR() {
+
         size_t ir_size = frequencyDependentIRs[F_125].size();
-        if (ir_size == 0 || 
-            (frequencyDependentIRs[F_125].size()  != ir_size) ||
-            (frequencyDependentIRs[F_250].size()  != ir_size) ||
-            (frequencyDependentIRs[F_500].size()  != ir_size) ||
-            (frequencyDependentIRs[F_1000].size() != ir_size) ||
-            (frequencyDependentIRs[F_2000].size() != ir_size) ||
-            (frequencyDependentIRs[F_4000].size() != ir_size)) {
-            DSPTB_ERROR("Invalid dsptb_erb_band parameter! Aborting FilterBank::generateIR.");
-            return DSPTB_FAILURE;
-        }
+        if (checkIRs() != DSPTB_SUCCESS) return DSPTB_FAILURE;
 
         filter_125.convolveToSignal(frequencyDependentIRs[F_125]);
         filter_250.convolveToSignal(frequencyDependentIRs[F_250]);
@@ -40,6 +32,22 @@ namespace dsptb {
                 frequencyDependentIRs[F_4000][i];
         }
         normalise(ir);
+        DSPTB_LOG("Generated IR of len " << ir.size());
+        return DSPTB_SUCCESS;
+    }
+
+    int FilterBank::checkIRs() {
+        size_t ir_size = frequencyDependentIRs[F_125].size();
+        if (ir_size == 0 || 
+            (frequencyDependentIRs[F_125].size()  != ir_size) ||
+            (frequencyDependentIRs[F_250].size()  != ir_size) ||
+            (frequencyDependentIRs[F_500].size()  != ir_size) ||
+            (frequencyDependentIRs[F_1000].size() != ir_size) ||
+            (frequencyDependentIRs[F_2000].size() != ir_size) ||
+            (frequencyDependentIRs[F_4000].size() != ir_size)) {
+            DSPTB_ERROR("Invalid dsptb_erb_band parameter! Aborting FilterBank::generateIR.");
+            return DSPTB_FAILURE;
+        }
         return DSPTB_SUCCESS;
     }
 

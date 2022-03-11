@@ -37,19 +37,30 @@ enum DSPTB_ERB_BAND {
 EXPORT int dsptbInit(dsptbSETTINGS* settings);
 EXPORT void dsptbQuit();
 
+EXPORT const char* dsptbGetError(void);
+EXPORT const char* dsptbGetLogs(void);
+EXPORT void dsptbClearLogs(void);
+EXPORT void dsptbClearError(void);
 
 /**
  * Set Impulse Response for a specific ERB frequency @param dsptb_erb_band.
- * All bands must be set before convolution operations.
+ * All 6 bands must be set before convolution operations, and must have equal length.
  * @param data is a pointer to a float array of a specified @param length.
 **/ 
-EXPORT int dsptbSetFrequencyDependentIRs(float* data, int length, int dsptb_erb_band);
+EXPORT int dsptbSetFrequencyDependentIRs(const float* data, int length, int dsptb_erb_band);
 
 /**
  * Convolve filter bank to all frequency-dependent Impulse Responses.
  * All ERB bands must have a signal of the same length.
 **/ 
 EXPORT int dsptbConvolveFilterBankToIRs(void);
+
+/**
+ * Obtain a pointer to the head of the IR array, @param data, and its length,
+ * @param len.
+ * Successful only if all 6 bands are set and the filterbank is applied.
+**/
+EXPORT int dsptbGetIR(const float** data, int* len);
 
 
 #ifdef __cplusplus
