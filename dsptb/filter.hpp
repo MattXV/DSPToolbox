@@ -2,6 +2,7 @@
 #define DSPTB_FILTER_HPP
 #pragma once
 #include "utils.hpp"
+#include <cmath>
 #include <pffft.h>
 
 namespace dsptb {
