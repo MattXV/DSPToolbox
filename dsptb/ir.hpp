@@ -1,8 +1,11 @@
 #ifndef DSPTB_IR_HPP
 #define DSPTB_IR_HPP
+#pragma once
 #include "filter.hpp"
 #include <array>
-#pragma once
+#include <cmath>
+#include <random>
+#include <algorithm>
 
 namespace dsptb {
     class FilterBank {
@@ -27,6 +30,9 @@ namespace dsptb {
         DISABLE_COPY_ASSIGN(FilterBank)
     };
 
+
+    signal poisson_dirac_sequence(const size_t& energy_hist, unsigned int hist_fs, float volume);
+    signal dirac_sequence_weighting(const signal& energy_hist, const signal& dirac_sequence);
 
 }
 #endif

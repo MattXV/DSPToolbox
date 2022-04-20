@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <random>
 
 #define DISABLE_COPY_ASSIGN(Class) \
     Class(const Class&) = delete; \
@@ -44,6 +45,14 @@ namespace dsptb {
         x |= x >> 16; // handle 32 bit numbers
         x++;
         return x;
+    }
+
+    template<typename T>
+    T random(T range_from, T range_to) {
+        std::random_device                  rand_dev;
+        std::mt19937                        generator(rand_dev());
+        std::uniform_int_distribution<T>    distr(range_from, range_to);
+        return distr(generator);
     }
 
 }

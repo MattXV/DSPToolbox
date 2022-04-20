@@ -106,6 +106,22 @@ extern "C" {
         return DSPTB_SUCCESS;
     }
 
+    int dsptbGeneratePoissonDiracSequence(int n_samples, float volume, const float** data, int* len) {
+        if (!dsptb::dsptbInitOK) {
+            DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbGetIR.");
+            return DSPTB_FAILURE;
+        }
+
+        dsptb::signal dirac_sequence = dsptb::poisson_dirac_sequence(static_cast<size_t>(n_samples), dsptb::settings.sampleRate, volume);
+        float* unmanaged = new float[dirac_sequence.size()];
+        std::memcpy(static_cast<void*>(unmanaged), dirac_sequence.data(), dirac_sequence.size() * sizeof(float));
+        *data = unmanaged;
+        *len = dirac_sequence.size();
+
+        return DSPTB_SUCCESS;
+
+    }
+
 
     int dsptbConvolveFilterBankToIRs(void) {
         if (!dsptb::dsptbInitOK) {

@@ -51,4 +51,44 @@ namespace dsptb {
         return DSPTB_SUCCESS;
     }
 
+
+
+    inline float delta_t(float uniform_random_z, float simulation_time, float volume) {
+        float u = (4.0f * dsptb::pi * powf(343, 3) * powf(simulation_time, 2)) / volume;
+        return logf(1.0f / uniform_random_z) / u;
+    }
+
+    inline float interval_t0(float volume) {
+        return powf((2.0f * volume * logf(2)) / (4.0f * dsptb::pi * powf(343, 3)), 1.0f / 3.0f);
+    }
+
+    signal poisson_dirac_sequence(const size_t& n_samples, unsigned int hist_fs, float volume) {
+        
+        std::random_device                       rand_dev;
+        std::mt19937                             generator(rand_dev());
+        std::uniform_real_distribution<float>    distr(0.001f, 1.0f);
+
+        signal dirac_sequence = signal(n_samples, 0.0f);
+        float value = 1.0f;
+        size_t td = static_cast<size_t>(interval_t0(volume) * static_cast<float>(hist_fs));
+        while (td < n_samples) {
+            dirac_sequence[td] = value;
+            td += std::max(static_cast<size_t>(delta_t(distr(generator), static_cast<float>(td) / static_cast<float>(hist_fs), volume) * hist_fs), size_t(2));
+            value *= -1.0f;
+        }
+        return dirac_sequence;
+    }
+
+    signal dirac_sequence_weighting(const signal& energy_hist, const signal& dirac_sequence) {
+        size_t len = energy_hist.size();
+        signal weighted_ir = signal(len, 0);
+        for (size_t i = 0; i < len; i++) {
+            float dirac = dirac_sequence[i];
+            float weight = fabsf(energy_hist[i]) / (powf(std::max(fabsf(dirac), 0.001f), 1.0f));
+            weighted_ir[i] = dirac * sqrtf(weight);
+        }
+        return weighted_ir; 
+    }
+
+
 }

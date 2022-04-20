@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 3.14)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+
+add_executable(sandbox sandbox.cpp)
+target_include_directories(sandbox PUBLIC "${CMAKE_SOURCE_DIR}/include")
+target_link_libraries(sandbox PRIVATE dsptb)
+target_link_libraries(sandbox PRIVATE sndfile)
+
+# add_custom_command(TARGET asr POST_BUILD        # Adds a post-build event to MyTest
+#     COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
+#         "${PROJECT_SOURCE_DIR}/libs/test.dll"      # <--this is in-file
+#         $<TARGET_FILE_DIR:MyTest>)                 # <--this is out-file path
+
+add_custom_command(TARGET sandbox POST_BUILD 
+               COMMAND ${CMAKE_COMMAND} -E copy_if_different
+               $<TARGET_FILE:dsptb>              
+               $<TARGET_FILE_DIR:sandbox>)

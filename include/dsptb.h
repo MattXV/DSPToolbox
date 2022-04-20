@@ -63,6 +63,9 @@ EXPORT int dsptbConvolveFilterBankToIRs(void);
 EXPORT int dsptbGetIR(const float** data, int* len);
 
 
+EXPORT int dsptbGeneratePoissonDiracSequence(int n_samples, float volume, const float** data, int* len);
+
+
 #ifdef __cplusplus
 }      // extern "C"
 #endif 
