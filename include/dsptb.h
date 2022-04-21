@@ -52,8 +52,10 @@ EXPORT int dsptbSetFrequencyDependentIRs(const float* data, int length, int dspt
 /**
  * Convolve filter bank to all frequency-dependent Impulse Responses.
  * All ERB bands must have a signal of the same length.
+ * @param volume indicates the volume of the environment for the 
+ *  Poisson-distributed Dirac Delta sequences (Schroder, 2011) 
 **/ 
-EXPORT int dsptbConvolveFilterBankToIRs(void);
+EXPORT int dsptbConvolveFilterBankToIRs(float volume);
 
 /**
  * Obtain a pointer to the head of the IR array, @param data, and its length,
@@ -63,7 +65,7 @@ EXPORT int dsptbConvolveFilterBankToIRs(void);
 EXPORT int dsptbGetIR(const float** data, int* len);
 
 
-EXPORT int dsptbGeneratePoissonDiracSequence(int n_samples, float volume, const float** data, int* len);
+EXPORT int dsptbGeneratePoissonDiracSequence(int n_samples, float volume, const float** data);
 
 
 #ifdef __cplusplus

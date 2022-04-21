@@ -13,7 +13,7 @@ namespace dsptb {
             FilterBank();
             ~FilterBank() {}
 
-            int generateIR();
+            int generateIR(float volume);
             
             const signal& getIR() const { return ir; }
 
@@ -23,16 +23,19 @@ namespace dsptb {
             const signal& getFrequencyDependentIRs(DSPTB_ERB_BAND irBand) const { return frequencyDependentIRs[irBand]; }
         private:
             int checkIRs();
+            int generateDiracDeltas();
 
             Filter filter_125, filter_250, filter_500, filter_1000, filter_2000, filter_4000;
             std::array<signal, 6> frequencyDependentIRs;
+            std::array<signal, 6> diracDeltaSequences;
             signal ir;
+            float volume;
         DISABLE_COPY_ASSIGN(FilterBank)
     };
 
 
-    signal poisson_dirac_sequence(const size_t& energy_hist, unsigned int hist_fs, float volume);
-    signal dirac_sequence_weighting(const signal& energy_hist, const signal& dirac_sequence);
+    void poisson_dirac_sequence(float* out_sequence, size_t length, unsigned int fs, float volume);
+    void dirac_sequence_weighting(signal& energy_hist, const signal& dirac_sequence);
 
 }
 #endif

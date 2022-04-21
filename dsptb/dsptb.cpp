@@ -106,29 +106,30 @@ extern "C" {
         return DSPTB_SUCCESS;
     }
 
-    int dsptbGeneratePoissonDiracSequence(int n_samples, float volume, const float** data, int* len) {
+    int dsptbGeneratePoissonDiracSequence(int n_samples, float volume, const float** data) {
         if (!dsptb::dsptbInitOK) {
-            DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbGetIR.");
+            DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbGeneratePoissonDiracSequence.");
             return DSPTB_FAILURE;
         }
-
-        dsptb::signal dirac_sequence = dsptb::poisson_dirac_sequence(static_cast<size_t>(n_samples), dsptb::settings.sampleRate, volume);
-        float* unmanaged = new float[dirac_sequence.size()];
-        std::memcpy(static_cast<void*>(unmanaged), dirac_sequence.data(), dirac_sequence.size() * sizeof(float));
+        size_t length = static_cast<size_t>(n_samples);
+        if (length < 1) {
+            DSPTB_ERROR("Invalid n_samples parameter. Aborting dsptbGeneratePoissonDiracSequence");
+            return DSPTB_FAILURE;
+        }
+        
+        float* unmanaged = new float[n_samples];
+        dsptb::poisson_dirac_sequence(unmanaged, length, dsptb::settings.sampleRate, volume);
         *data = unmanaged;
-        *len = dirac_sequence.size();
-
         return DSPTB_SUCCESS;
-
     }
 
 
-    int dsptbConvolveFilterBankToIRs(void) {
+    int dsptbConvolveFilterBankToIRs(float volume) {
         if (!dsptb::dsptbInitOK) {
             DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbSetFrequencyDependentIRs.");
             return DSPTB_FAILURE;
         }
-        int ok = dsptb::filterBank->generateIR();
+        int ok = dsptb::filterBank->generateIR(volume);
         return ok;
     }
 
