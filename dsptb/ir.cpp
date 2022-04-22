@@ -14,6 +14,16 @@ namespace dsptb {
         size_t ir_size = frequencyDependentIRs[F_125].size();
         if (checkIRs() != DSPTB_SUCCESS) return DSPTB_FAILURE;
 
+        DSPTB_LOG("----------------------------------------------------------");
+
+        DSPTB_LOG("Applying filter bank to signal.");
+        DSPTB_LOG("Signal length: " << frequencyDependentIRs[F_125].size() << std::endl);
+        DSPTB_LOG("Filter/settings sample rate: " << filter_125.getSampleRate() << std::endl);
+        DSPTB_LOG("Filter/settings kernel size: " << filter_125.getKernelSize() << std::endl);
+        DSPTB_LOG("Filter kernel size: " << filter_125.getKernel().size() << std::endl);
+
+        DSPTB_LOG("----------------------------------------------------------");
+
         filter_125.convolveToSignal(frequencyDependentIRs[F_125]);
         filter_250.convolveToSignal(frequencyDependentIRs[F_250]);
         filter_500.convolveToSignal(frequencyDependentIRs[F_500]);

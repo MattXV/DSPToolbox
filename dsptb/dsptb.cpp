@@ -46,7 +46,7 @@ extern "C" {
         return DSPTB_SUCCESS;
     }
     void dsptbQuit() {
-
+        dsptb::outConvolution.clear();
     }
 
     const char* dsptbGetError(void) {
@@ -114,6 +114,29 @@ extern "C" {
         }
         int ok = dsptb::filterBank->generateIR();
         return ok;
+    }
+
+    int dsptbFFTConvolve(const float* a, int lenA, const float* kernel, int lenKernel, const float** outConvolution, int* outLenConvolution) {
+        if (!dsptb::dsptbInitOK) {
+            DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbFFTConvolve.");
+            return DSPTB_FAILURE;
+        }
+        if (!a) {
+            DSPTB_ERROR("Invalid pointer: a. Aborting dsptbFFTConvolve.");
+            return DSPTB_FAILURE;
+        }
+        if (!kernel) {
+            DSPTB_ERROR("Invalid pointer: kernel. Aborting dsptbFFTConvolve.");
+            return DSPTB_FAILURE;
+        }
+        dsptb::signal _signal = dsptb::signal(a, a + lenA);
+        dsptb::signal _kernel = dsptb::signal(kernel, kernel + lenKernel);
+
+        dsptb::outConvolution.clear();
+        dsptb::outConvolution = dsptb::fft_convolve(_signal, _kernel);
+        *outConvolution = dsptb::outConvolution.data();
+        *outLenConvolution = dsptb::outConvolution.size();
+        return DSPTB_SUCCESS;
     }
 
 }

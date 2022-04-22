@@ -62,6 +62,12 @@ EXPORT int dsptbConvolveFilterBankToIRs(void);
 **/
 EXPORT int dsptbGetIR(const float** data, int* len);
 
+/**
+ * FFT convolution to apply @param kernel of length @param lenKernel to @param a signal of length @param lenA.
+ * The convolution results exists until dsptbQuit is called. 
+**/
+EXPORT int dsptbFFTConvolve(const float* a, int lenA, const float* kernel, int lenKernel, const float** outConvolution, int* outLenConvolution);
+
 
 #ifdef __cplusplus
 }      // extern "C"

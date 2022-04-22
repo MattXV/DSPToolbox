@@ -18,7 +18,10 @@ namespace dsptb {
             ~Filter() = default;
 
             void convolveToSignal(signal& signal);
+
             const signal& getKernel() { return h; }
+            unsigned int getSampleRate() const { return fs; }
+            unsigned int getKernelSize() const { return M; }
 
         private:
             signal h;
