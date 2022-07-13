@@ -18,14 +18,17 @@ namespace dsptb {
             Filter(filterType fType, float lowerCutoff, float upperCutoff);
             ~Filter() = default;
 
-            void convolveToSignal(signal& signal);
+            void convolve(signal& signal) const;
+
             const signal& getKernel() { return h; }
+            const int getSampleRate() const { return fs; }
+            const int getKernelSize() const { return M; }
 
         private:
             signal h;
             float lower_fc = 0.0f, upper_fc = 0.0f;
-            const unsigned int& M = settings.dspKernelSize;
-            const unsigned int& fs = settings.sampleRate;
+            const int& M = settings.dspKernelSize;
+            const int& fs = settings.sampleRate;
         DISABLE_COPY_ASSIGN(Filter)
     };
 }

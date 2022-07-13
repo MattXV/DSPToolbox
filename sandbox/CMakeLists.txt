@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 
 add_executable(sandbox sandbox.cpp)
+target_compile_features(sandbox PUBLIC cxx_std_20)
 target_include_directories(sandbox PUBLIC "${CMAKE_SOURCE_DIR}/include")
 target_link_libraries(sandbox PRIVATE dsptb)
 target_link_libraries(sandbox PRIVATE sndfile)

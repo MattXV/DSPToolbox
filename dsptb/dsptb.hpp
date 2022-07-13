@@ -13,6 +13,9 @@
 
 namespace dsptb {
     std::unique_ptr<FilterBank> filterBank;
+    
+    // Data
+    signal outConvolution;
 
     extern std::string currentLogs;
     bool dsptbInitOK = false;

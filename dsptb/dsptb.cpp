@@ -46,7 +46,7 @@ extern "C" {
         return DSPTB_SUCCESS;
     }
     void dsptbQuit() {
-
+        dsptb::outConvolution.clear();
     }
 
     const char* dsptbGetError(void) {
@@ -66,7 +66,7 @@ extern "C" {
         return dsptb::currentLogs.c_str();
     }
 
-    int dsptbSetFrequencyDependentIRs(const float* data, int length, int dsptb_erb_band) {
+    int dsptbSetEnergyHistograms(const float* data, int length, int dsptb_erb_band) {
         if (!dsptb::dsptbInitOK) {
             DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbSetFrequencyDependentIRs.");
             return DSPTB_FAILURE;
@@ -90,7 +90,41 @@ extern "C" {
         return DSPTB_SUCCESS;
     }
 
-    int dsptbGetIR(const float** data, int* len) {
+    int dsptbGetGeneratedDiracSequence(const float** data, int* len, DSPTB_ERB_BAND band) {
+        if (!dsptb::dsptbInitOK) {
+            DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbGetIR.");
+            return DSPTB_FAILURE;
+        }
+        const dsptb::signal& ir = dsptb::filterBank->getIR();
+        if (ir.size() == 0) {
+            DSPTB_ERROR("IR not generated. Aborting dsptbGetIR.");
+            return DSPTB_FAILURE;
+        }
+
+        const dsptb::signal& sequence = dsptb::filterBank->getDiracSequence(band);
+        *data = sequence.data();
+        *len = static_cast<int>(sequence.size());
+        return DSPTB_SUCCESS;
+    }
+
+    int dsptbGetIRComponent(const float** data, int* len, DSPTB_ERB_BAND band) {
+        if (!dsptb::dsptbInitOK) {
+            DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbGetIRComponent.");
+            return DSPTB_FAILURE;
+        }
+        const dsptb::signal& ir = dsptb::filterBank->getIR();
+        if (ir.size() == 0) {
+            DSPTB_ERROR("IR not generated. Aborting dsptbGetIRComponent.");
+            return DSPTB_FAILURE;
+        }
+
+        const dsptb::signal& component = dsptb::filterBank->getFrequencyDependentIRs(band);
+        *data = component.data();
+        *len = component.size();
+        return DSPTB_SUCCESS;
+    }
+
+    int dsptbGetMonoauralIR(const float** data, int* len) {
         if (!dsptb::dsptbInitOK) {
             DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbGetIR.");
             return DSPTB_FAILURE;
@@ -118,19 +152,44 @@ extern "C" {
         }
         
         float* unmanaged = new float[n_samples];
-        dsptb::poisson_dirac_sequence(unmanaged, length, dsptb::settings.sampleRate, volume);
+        dsptb::signal temp(n_samples, 0);
+        dsptb::poisson_dirac_sequence(temp, length, dsptb::settings.sampleRate, volume);
+        memcpy(unmanaged, temp.data(), sizeof(float) * n_samples);
         *data = unmanaged;
         return DSPTB_SUCCESS;
     }
 
 
-    int dsptbConvolveFilterBankToIRs(float volume) {
+    int dsptbGenerateMonouralIR(float volume) {
         if (!dsptb::dsptbInitOK) {
             DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbSetFrequencyDependentIRs.");
             return DSPTB_FAILURE;
         }
         int ok = dsptb::filterBank->generateIR(volume);
         return ok;
+    }
+
+    int dsptbFFTConvolve(const float* a, int lenA, const float* kernel, int lenKernel, const float** outConvolution, int* outLenConvolution) {
+        if (!dsptb::dsptbInitOK) {
+            DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbFFTConvolve.");
+            return DSPTB_FAILURE;
+        }
+        if (!a) {
+            DSPTB_ERROR("Invalid pointer: a. Aborting dsptbFFTConvolve.");
+            return DSPTB_FAILURE;
+        }
+        if (!kernel) {
+            DSPTB_ERROR("Invalid pointer: kernel. Aborting dsptbFFTConvolve.");
+            return DSPTB_FAILURE;
+        }
+        dsptb::signal _signal = dsptb::signal(a, a + lenA);
+        dsptb::signal _kernel = dsptb::signal(kernel, kernel + lenKernel);
+
+        dsptb::outConvolution.clear();
+        dsptb::outConvolution = dsptb::fft_convolve(_signal, _kernel);
+        *outConvolution = dsptb::outConvolution.data();
+        *outLenConvolution = dsptb::outConvolution.size();
+        return DSPTB_SUCCESS;
     }
 
 }

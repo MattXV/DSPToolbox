@@ -47,7 +47,7 @@ EXPORT void dsptbClearError(void);
  * All 6 bands must be set before convolution operations, and must have equal length.
  * @param data is a pointer to a float array of a specified @param length.
 **/ 
-EXPORT int dsptbSetFrequencyDependentIRs(const float* data, int length, int dsptb_erb_band);
+EXPORT int dsptbSetEnergyHistograms(const float* data, int length, int dsptb_erb_band);
 
 /**
  * Convolve filter bank to all frequency-dependent Impulse Responses.
@@ -55,18 +55,31 @@ EXPORT int dsptbSetFrequencyDependentIRs(const float* data, int length, int dspt
  * @param volume indicates the volume of the environment for the 
  *  Poisson-distributed Dirac Delta sequences (Schroder, 2011) 
 **/ 
-EXPORT int dsptbConvolveFilterBankToIRs(float volume);
+EXPORT int dsptbGenerateMonouralIR(float volume);
 
 /**
  * Obtain a pointer to the head of the IR array, @param data, and its length,
  * @param len.
  * Successful only if all 6 bands are set and the filterbank is applied.
 **/
-EXPORT int dsptbGetIR(const float** data, int* len);
+EXPORT int dsptbGetMonoauralIR(const float** data, int* len);
 
+/**
+ * FFT convolution to apply @param kernel of length @param lenKernel to @param a signal of length @param lenA.
+ * The convolution results exists until dsptbQuit is called. 
+**/
+EXPORT int dsptbFFTConvolve(const float* a, int lenA, const float* kernel, int lenKernel, const float** outConvolution, int* outLenConvolution);
 
+/**
+ * Testing: Generates and returns a Poisson-distributed Dirac Delta sequence
+ * Generates an unmanaged raw array.
+**/
 EXPORT int dsptbGeneratePoissonDiracSequence(int n_samples, float volume, const float** data);
 
+
+EXPORT int dsptbGetGeneratedDiracSequence(const float** data, int* len, DSPTB_ERB_BAND band);
+
+EXPORT int dsptbGetIRComponent(const float** data, int* len, DSPTB_ERB_BAND band);
 
 #ifdef __cplusplus
 }      // extern "C"

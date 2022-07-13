@@ -100,7 +100,7 @@ namespace dsptb
         
 		if (!(lower_fc > 0 && lower_fc < 0.5)) 
             DSPTB_ERROR("[DSP ERROR]: Invalid parameter cutoff_hz to Filter!");
-		if (!(fs > 0))
+		if (fs < 0)
             DSPTB_ERROR("[DSP ERROR]: Invalid Sample Rate");
 		if (filt_t != filterType::BPF)
             DSPTB_ERROR("[DSP ERROR]: Invalid parameter filterType to Filter!");
@@ -117,17 +117,17 @@ namespace dsptb
             DSPTB_ERROR("[DSP ERROR]: Invalid parameter cutoff_hz to Filter!");
 		if (!(upper_fc > 0 && upper_fc < 0.5))
             DSPTB_ERROR("[DSP ERROR]: Invalid parameter cutoff_hz to Filter!");
-		if (!(fs > 0))
+		if (fs < 0)
             DSPTB_ERROR("[DSP ERROR]: Invalid Sample Rate");
 		if (!(filt_t == filterType::BPF))
             DSPTB_ERROR("[DSP ERROR]: Invalid parameter filterType to Filter!");
 		h = designBPF(M, lower_fc, upper_fc);
 	}
-	void Filter::convolveToSignal(signal& inputSignal)
+	void Filter::convolve(signal& inputSignal) const
 	{
 		signal convolution = fft_convolve(inputSignal, h);
 		convolution.erase(convolution.begin(), convolution.begin() + h.size() / 2);
-		convolution.erase(convolution.begin() + inputSignal.size() - 1, convolution.end());
+		convolution.erase(convolution.begin() + inputSignal.size(), convolution.end());
 		inputSignal.swap(convolution);
 	}
 
