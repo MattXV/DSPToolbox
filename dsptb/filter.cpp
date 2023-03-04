@@ -29,7 +29,7 @@ namespace dsptb
         delete[] workSpace;
         delete[] convolution;
         pffft_destroy_setup(fftSetup);
-        return out;
+        return out; 
     }
     
     void normalise(signal& input, float scaling) {
@@ -102,7 +102,7 @@ namespace dsptb
             DSPTB_ERROR("[DSP ERROR]: Invalid parameter cutoff_hz to Filter!");
 		if (fs < 0)
             DSPTB_ERROR("[DSP ERROR]: Invalid Sample Rate");
-		if (filt_t != filterType::BPF)
+		if (filt_t == filterType::BPF)
             DSPTB_ERROR("[DSP ERROR]: Invalid parameter filterType to Filter!");
 		if (filt_t == filterType::LPF)	h = designLPF(M, lower_fc);
 		else							h = designHPF(M, lower_fc);

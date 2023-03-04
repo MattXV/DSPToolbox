@@ -77,6 +77,16 @@ EXPORT int dsptbFFTConvolve(const float* a, int lenA, const float* kernel, int l
 EXPORT int dsptbGeneratePoissonDiracSequence(int n_samples, float volume, const float** data);
 
 
+
+EXPORT int dsptbInitBlockProcessing(int blockLength, int channels);
+/**
+ * Overlap save
+*/
+EXPORT int dsptbProcessBlock(float* data);
+
+
+
+
 EXPORT int dsptbGetGeneratedDiracSequence(const float** data, int* len, DSPTB_ERB_BAND band);
 
 EXPORT int dsptbGetIRComponent(const float** data, int* len, DSPTB_ERB_BAND band);

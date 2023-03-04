@@ -15,6 +15,8 @@ list(APPEND
      "${CMAKE_SOURCE_DIR}/dsptb/filter.hpp"
      "${CMAKE_SOURCE_DIR}/dsptb/ir.hpp"
      "${CMAKE_SOURCE_DIR}/dsptb/ir.cpp"
+     "${CMAKE_SOURCE_DIR}/dsptb/processing.hpp"
+     "${CMAKE_SOURCE_DIR}/dsptb/processing.cpp"
 )
 list(APPEND 
      HEADERS 

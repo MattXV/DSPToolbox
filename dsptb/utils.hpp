@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iostream>
 #include <random>
+#include <utility>
 
 #define DISABLE_COPY_ASSIGN(Class) \
     Class(const Class&) = delete; \
@@ -34,6 +35,12 @@ namespace dsptb {
     typedef std::vector<sample> signal;
     constexpr float pi = 3.141592653589793f;
     constexpr float speed_of_sound = 343.0f;
+
+    static inline float clip( float n, float lower, float upper )
+    {
+    n = ( n > lower ) * n + !( n > lower ) * lower;
+    return ( n < upper ) * n + !( n < upper ) * upper;
+    }   
 
     inline unsigned int roundUpToNextPowerOfTwo(unsigned int x)
     {

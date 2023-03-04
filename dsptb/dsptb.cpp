@@ -192,4 +192,40 @@ extern "C" {
         return DSPTB_SUCCESS;
     }
 
+
+    int dsptbInitBlockProcessing(int blockLength, int channels) {
+        if (!dsptb::dsptbInitOK) {
+            DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbInitBlockProcessing.");
+            return DSPTB_FAILURE;
+        }
+        if (blockLength <= 0) {
+            DSPTB_ERROR("Invalid block length. Aborting dsptbInitBlockProcessing.");
+            return DSPTB_FAILURE; 
+        }
+        if (channels != 2) {
+            DSPTB_ERROR("Unsupported channels. Aborting dsptbInitBlockProcessing.");
+            return DSPTB_FAILURE; 
+        }
+        dsptb::Filter filter = dsptb::Filter(dsptb::Filter::filterType::LPF, 100);
+        dsptb::signal ir = filter.getKernel();
+        dsptb::overlapSave = std::unique_ptr<dsptb::OverlapSave>(new dsptb::OverlapSave(blockLength, channels, std::move(ir)));
+
+        return DSPTB_SUCCESS;
+    }
+
+    int dsptbProcessBlock(float* data) {
+        if (!dsptb::dsptbInitOK) {
+            DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbProcessBlock.");
+            return DSPTB_FAILURE;
+        }
+
+        if (!data) {
+            DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbProcessBlock.");
+            return DSPTB_FAILURE;
+        }
+
+        dsptb::overlapSave->processBlock(data);
+        return DSPTB_SUCCESS;
+    }
+
 }

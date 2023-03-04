@@ -4,6 +4,7 @@
 
 #include <dsptb.h>
 #include "ir.hpp"
+#include "processing.hpp"
 #include <memory>
 #include <vector>
 #include <string>
@@ -14,11 +15,14 @@
 namespace dsptb {
     std::unique_ptr<FilterBank> filterBank;
     
+    std::unique_ptr<OverlapSave> overlapSave;
+
     // Data
     signal outConvolution;
 
     extern std::string currentLogs;
     bool dsptbInitOK = false;
+
 }
 
 #endif
