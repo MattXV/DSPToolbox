@@ -9,16 +9,9 @@ namespace dsptb {
     void OverlapSave::prepare() {
         // ir = std::vector<float>(1024, float(0));
         // ir[1] = 1.0f;
-        overlap = ir.size() - 1;
-        fft_length = roundUpToNextPowerOfTwo(static_cast<unsigned int>(8 * overlap));
-        stepSize = static_cast<int>(fft_length) - overlap;
+        
+        fft_length = roundUpToNextPowerOfTwo((unsigned int)(ir.size() + block_length - 1));
 
-        leftInputBuffer.resize(fft_length, 0);
-        rightInputBuffer.resize(fft_length, 0);
-        inTap = 0;
-        leftOutputBuffer.resize(stepSize, 0);
-        rightOutputBuffer.resize(stepSize, 0);
-        outTap = 0;
         fftIn = new float[fft_length];
         fftOut = new float[fft_length];
         fftIr = new float[fft_length];
@@ -27,79 +20,47 @@ namespace dsptb {
         for (int i = 0; i < ir.size(); i++) {
             fftIr[i] = ir[i];
         }
+        for (int i = ir.size(); i < fft_length; i++) {
+            fftIr[i] = 0;
+        }
         fft_setup = pffft_new_setup((int)fft_length, pffft_transform_t::PFFFT_REAL);
-
         pffft_transform(fft_setup, fftIr, fftIr, fftWorkspace, pffft_direction_t::PFFFT_FORWARD);
-
-        DSPTB_LOG("[OverlapSave]: overlap len: " << overlap << ", input/out buffer len: " << leftInputBuffer.size() << "," << leftOutputBuffer.size() <<
-            "fft len: " << fft_length << "fft setup" << fft_setup << std::endl
-        );
 
     }
     
     void OverlapSave::processBlock(float* block) {
-
-        for (int sample = 0; sample < block_length; sample++) {
-
-            leftInputBuffer[inTap] = block[sample * channels];
-            rightInputBuffer[inTap] = block[sample * channels + 1];
-            inTap = (inTap + 1) % leftInputBuffer.size();
-
-            block[sample * channels] = leftOutputBuffer[outTap];
-            block[sample * channels + 1] = rightOutputBuffer[outTap];
-
-            if (++outTap == leftOutputBuffer.size()) {
-                performConvolution();
-                outTap = 0;
-            }
-        }
-    }
-
-    void OverlapSave::performConvolution()
-    {
-        for (int i = 0, readPos = inTap; i < fft_length; ++i, readPos = (readPos + 1) % leftInputBuffer.size()) {
-            const float& sample = leftInputBuffer[readPos];
-            fftIn[i] = std::isnan(sample) ? 0.0f : clip(sample, -1.0f, 1.0f);
+        for (int i = 0; i < block_length; i++) {
+            
+            fftIn[i] = clip(block[i * channels], -1.0f, 1.0f);
+            block[i * channels] = 0;
+            block[i * channels + 1] = 0;
             fftOut[i] = 0;
         }
-
-        pffft_transform(fft_setup, fftIn, fftOut, fftWorkspace, pffft_direction_t::PFFFT_FORWARD);
-        if (once) {
-            std::stringstream ss, ss1;
-            for (int i = 0; i < fft_length; i++) {
-                ss << fftIr[i] << ',';
-                ss1 << fftOut[i] << ',';
-            }
-            DSPTB_LOG("forward fftin: " << ss.str() << std::endl);
-            DSPTB_LOG("forward fftout: " << ss1.str() << std::endl);
-            DSPTB_LOG("fft setup" << fft_setup << std::endl);
+        for (int i = block_length; i < fft_length; i++) {
+            fftIn[i] = 0;
+            fftOut[i] = 0;
         }
-        pffft_zconvolve_accumulate(fft_setup, fftOut, fftIr, fftOut, 1.0f / (float)fft_length);
-        if (once) {
-            std::stringstream ss, ss1;
-            for (int i = 0; i < fft_length; i++) {
-                ss << fftIr[i] << ',';
-                ss1 << fftOut[i] << ',';
-            }
-            DSPTB_LOG("z acc fftin: " << ss.str() << std::endl);
-            DSPTB_LOG("z acc fftout: " << ss1.str() << std::endl);
-        }
+        pffft_transform(fft_setup, fftIn, fftIn, fftWorkspace, pffft_direction_t::PFFFT_FORWARD);
+        pffft_zconvolve_accumulate(fft_setup, fftIn, fftIr, fftOut, 1.0f);
         pffft_transform(fft_setup, fftOut, fftOut, fftWorkspace, pffft_direction_t::PFFFT_BACKWARD);
-        if (once) {
-            std::stringstream ss, ss1;
-            for (int i = 0; i < fft_length; i++) {
-                ss1 << fftOut[i] << ',';
+
+        std::vector<float> newResult = std::vector<float>(fftOut, fftOut + fft_length);
+        previousResults.push_back(newResult);
+
+        for (std::vector<float>& previousResult : previousResults) {
+            for (int sample = 0; sample < block_length; sample++) {
+                if (previousResult.empty()) {
+                    break;
+                }
+                float resultValue = previousResult.front() / (float)fft_length;
+                previousResult.erase(previousResult.begin(), previousResult.begin() + 1);
+                block[sample * channels] += resultValue;
+                block[sample * channels + 1] += resultValue;
             }
-            DSPTB_LOG("backward fftout: " << ss1.str() << std::endl);
-            once = false;
         }
-
-
-        for (int i = 0; i < leftOutputBuffer.size(); i++) {
-            leftOutputBuffer[i] = fftOut[i + overlap] * 0.0001f;
-            rightOutputBuffer[i] = fftOut[i + overlap] * 0.0001f;
-        }
+        previousResults.remove_if([](const std::vector<float>& result) { return result.empty(); });
     }
+
 
     OverlapSave::~OverlapSave() {
         pffft_destroy_setup(fft_setup);

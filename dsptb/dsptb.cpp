@@ -206,7 +206,7 @@ extern "C" {
             DSPTB_ERROR("Unsupported channels. Aborting dsptbInitBlockProcessing.");
             return DSPTB_FAILURE; 
         }
-        dsptb::Filter filter = dsptb::Filter(dsptb::Filter::filterType::LPF, 100);
+        dsptb::Filter filter = dsptb::Filter(dsptb::Filter::filterType::LPF, 300);
         dsptb::signal ir = filter.getKernel();
         dsptb::overlapSave = std::unique_ptr<dsptb::OverlapSave>(new dsptb::OverlapSave(blockLength, channels, std::move(ir)));
 

@@ -38,6 +38,7 @@ namespace dsptb {
 
     static inline float clip( float n, float lower, float upper )
     {
+        if (std::isnan(n)) n = 0;
     n = ( n > lower ) * n + !( n > lower ) * lower;
     return ( n < upper ) * n + !( n < upper ) * upper;
     }   

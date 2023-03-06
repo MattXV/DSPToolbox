@@ -8,7 +8,7 @@ add_executable(sandbox sandbox.cpp)
 target_compile_features(sandbox PUBLIC cxx_std_20)
 target_include_directories(sandbox PUBLIC "${CMAKE_SOURCE_DIR}/include")
 target_link_libraries(sandbox PRIVATE dsptb)
-# target_link_libraries(sandbox PRIVATE sndfile)
+target_link_libraries(sandbox PRIVATE sndfile)
 
 # add_custom_command(TARGET asr POST_BUILD        # Adds a post-build event to MyTest
 #     COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
