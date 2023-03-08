@@ -24,9 +24,9 @@ include(ExternalProject)
 include(extern/pffft.cmake)
 
 
-add_subdirectory(${DSPTB_EXTERN_DIR}/libsndfile)
-set_target_properties(sndfile PROPERTIES BUILD_EXAMPLES OFF)
-set_target_properties(sndfile PROPERTIES BUILD_SHARED_LIBS ON)
+# add_subdirectory(${DSPTB_EXTERN_DIR}/libsndfile)
+# set_target_properties(sndfile PROPERTIES BUILD_EXAMPLES OFF)
+# set_target_properties(sndfile PROPERTIES BUILD_SHARED_LIBS ON)
 
 project(dsptb VERSION 1.0
 DESCRIPTION "DSP Toolbox"
@@ -42,10 +42,10 @@ enable_testing()
 
 add_subdirectory(dsptb)
 add_subdirectory(sandbox)
-add_subdirectory(test)
+# add_subdirectory(test)
 
 set(CMAKE_INSTALL_PREFIX "install")
-install(TARGETS dsptb sandbox
+install(TARGETS dsptb
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
