@@ -4,3 +4,9 @@
 [submodule "extern/libsndfile"]
 	path = extern/libsndfile
 	url = https://github.com/libsndfile/libsndfile
+[submodule "extern/libmysofa"]
+	path = extern/libmysofa
+	url = https://github.com/hoene/libmysofa
+[submodule "extern/zlib"]
+	path = extern/zlib
+	url = https://github.com/madler/zlib

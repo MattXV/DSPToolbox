@@ -24,6 +24,7 @@ list(APPEND
 
 add_library(dsptb SHARED ${SOURCES})
 target_link_libraries(dsptb PRIVATE pffft)
+target_link_libraries(dsptb PRIVATE mysofa-static)
 target_sources(dsptb PUBLIC ${HEADERS})
 
 set_target_properties(dsptb

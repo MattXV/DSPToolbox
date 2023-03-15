@@ -76,15 +76,25 @@ EXPORT int dsptbFFTConvolve(const float* a, int lenA, const float* kernel, int l
 **/
 EXPORT int dsptbGeneratePoissonDiracSequence(int n_samples, float volume, const float** data);
 
-
-
-EXPORT int dsptbInitBlockProcessing(int blockLength, int channels);
+/*
+ * Init Overlapp Add. 
+ * @returns int blockProcessingObject ID on Success
+**/
+EXPORT int dsptbInitBlockProcessing(int blockLength, int irLength, int channels);
 /**
- * Overlap save
-*/
-EXPORT int dsptbProcessBlock(float* data);
+ * Overlap Add
+**/
+EXPORT int dsptbProcessBlock(int blockProcessingObject, float* data);
 
+/**
+ * HRTF loader via libmysofa
+**/
+EXPORT int dsptbLoadHRTF(const char* path);
 
+/**
+ * Use the blockProcessingObject ID to set HRTF to OverlapAdd objects
+**/
+EXPORT int dsptbSetHRTFToBlockProcessing(int hrtfObject, int blockProcessingObject, float x, float y, float z);
 
 
 EXPORT int dsptbGetGeneratedDiracSequence(const float** data, int* len, DSPTB_ERB_BAND band);

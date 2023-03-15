@@ -12,10 +12,12 @@
 #include <sstream>
 #include <array>
 
+
 namespace dsptb {
     std::unique_ptr<FilterBank> filterBank;
     
-    std::unique_ptr<OverlapSave> overlapSave;
+    std::vector<std::unique_ptr<OverlapAdd>> blockProcessingObjects;
+    std::vector<std::unique_ptr<HRTF>> hrtfObjects;
 
     // Data
     signal outConvolution;

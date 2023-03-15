@@ -47,6 +47,8 @@ extern "C" {
     }
     void dsptbQuit() {
         dsptb::outConvolution.clear();
+        dsptb::filterBank.reset();
+        dsptb::blockProcessingObjects.clear();
     }
 
     const char* dsptbGetError(void) {
@@ -193,7 +195,7 @@ extern "C" {
     }
 
 
-    int dsptbInitBlockProcessing(int blockLength, int channels) {
+    int dsptbInitBlockProcessing(int blockLength, int irLength, int channels) {
         if (!dsptb::dsptbInitOK) {
             DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbInitBlockProcessing.");
             return DSPTB_FAILURE;
@@ -206,26 +208,33 @@ extern "C" {
             DSPTB_ERROR("Unsupported channels. Aborting dsptbInitBlockProcessing.");
             return DSPTB_FAILURE; 
         }
-        dsptb::Filter filter = dsptb::Filter(dsptb::Filter::filterType::LPF, 300);
-        dsptb::signal ir = filter.getKernel();
-        dsptb::overlapSave = std::unique_ptr<dsptb::OverlapSave>(new dsptb::OverlapSave(blockLength, channels, std::move(ir)));
 
+        dsptb::blockProcessingObjects.emplace_back(new dsptb::OverlapAdd(blockLength, irLength, channels));
+        
+        return dsptb::blockProcessingObjects.size() - 1;
+    }
+
+    int dsptbProcessBlock(int blockProcessingObject, float* data) {
+        dsptb::blockProcessingObjects[blockProcessingObject]->processBlock(data);
         return DSPTB_SUCCESS;
     }
 
-    int dsptbProcessBlock(float* data) {
+    int dsptbLoadHRTF(const char* path) {
         if (!dsptb::dsptbInitOK) {
-            DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbProcessBlock.");
+            DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbLoadHRTF.");
             return DSPTB_FAILURE;
         }
 
-        if (!data) {
-            DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbProcessBlock.");
+        std::unique_ptr<dsptb::HRTF> newHrtf = std::unique_ptr<dsptb::HRTF>(new dsptb::HRTF(path));
+        if (newHrtf->load() == DSPTB_FAILURE) {
             return DSPTB_FAILURE;
         }
-
-        dsptb::overlapSave->processBlock(data);
-        return DSPTB_SUCCESS;
+        dsptb::hrtfObjects.push_back(newHrtf);
+        return dsptb::hrtfObjects.size() - 1;
     }
 
-}
+    int dsptbSetHRTFToBlockProcessing(int hrtfObject, int blockProcessingObject, float x, float y, float z) {
+        dsptb::hrtfObjects[hrtfObject]->setFiltersToOverlapAdd(*dsptb::blockProcessingObjects[blockProcessingObject], x, y, z);
+    }
+
+} 

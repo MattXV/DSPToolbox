@@ -15,10 +15,10 @@
     Class& operator=(const Class&) = delete;
 
 #ifndef NDEBUG
-    #define DSPTB_ERROR(String) do { DSPTB_SetError(String); } while (0)
+    #define DSPTB_ERROR(String) do { std::stringstream err; err << String; std::cerr << err.str(); DSPTB_SetError(err.str()); } while (0)
     #define DSPTB_LOG(Message)  do { std::stringstream log; log << Message; std::cout << log.str() << std::endl; DSPTB_Log(log.str().c_str()); } while (0)
 #else
-    #define DSPTB_ERROR(Message)    do {} while (0)
+    #define DSPTB_ERROR(Message)    do {std::stringstream err; err << String; DSPTB_SetError(err.str());} while (0)
     #define DSPTB_LOG(Message)      do {} while (0)
 
 #endif
