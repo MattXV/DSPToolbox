@@ -15,21 +15,25 @@ namespace dsptb {
             ~OverlapAdd();
             
             void processBlock(float* block);
-            void setIRData(float* data);
+            void setIRData(float* leftIr, float* rightIR);
 
         private:
             void prepare();
 
             PFFFT_Setup* fft_setup = nullptr;
-            float* fftIn;
-            float* fftOut;
-            float* fftIr;
+            float* fftInL;
+            float* fftInR;
+            float* fftOutL;
+            float* fftOutR;
+            float* fftIrL;
+            float* fftIrR;
             float* fftWorkspace;
 
             const static int maxStackFFTSize = 16384;
             void tranformIR();
 
-            std::list<std::deque<float>> previousResults;
+            std::list<std::deque<float>> previousResultsL;
+            std::list<std::deque<float>> previousResultsR;
 
             size_t channels, block_length, ir_length, fft_length;
             DISABLE_COPY_ASSIGN(OverlapAdd)
@@ -54,9 +58,13 @@ namespace dsptb {
 
         float* leftIR;
         float* rightIR;
-        float* delayLeft;
-        float *delayRight;
+        float delayLeft;
+        float delayRight;
         std::string path;
+
+        const static int maxStackSize = 2048;
+        float leftStackBuffer[maxStackSize];
+        float rightStackBuffer[maxStackSize];
 
         MYSOFA_EASY* hrtf;
         DISABLE_COPY_ASSIGN(HRTF)

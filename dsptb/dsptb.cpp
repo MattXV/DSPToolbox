@@ -1,4 +1,5 @@
 #include "dsptb.hpp"
+#include "dsptb.h"
 
 namespace dsptb {
     std::string dsptb_error = std::string();
@@ -48,6 +49,7 @@ extern "C" {
     void dsptbQuit() {
         dsptb::outConvolution.clear();
         dsptb::filterBank.reset();
+        dsptb::hrtfObjects.clear();
         dsptb::blockProcessingObjects.clear();
     }
 
@@ -126,7 +128,40 @@ extern "C" {
         return DSPTB_SUCCESS;
     }
 
-    int dsptbGetMonoauralIR(const float** data, int* len) {
+    int dsptbDesignFilter(DSPTB_FILTER_TYPE filterType, float fc, float upperFc, float* outFilterData)
+    {
+        dsptb::Filter::filterType _filter_type;
+        switch (filterType) {
+            case DSPTB_FILTER_TYPE::LPF:
+                _filter_type = dsptb::Filter::filterType::LPF;
+                break;
+            case DSPTB_FILTER_TYPE::HPF:
+                _filter_type = dsptb::Filter::filterType::HPF;
+                break;
+            case DSPTB_FILTER_TYPE::BPF:
+                _filter_type = dsptb::Filter::filterType::BPF;
+                break;
+            default:
+                return DSPTB_FAILURE;
+        }
+
+        dsptb::Filter* filter;
+        if (_filter_type == dsptb::Filter::filterType::LPF || _filter_type == dsptb::Filter::filterType::HPF) {
+            filter = new dsptb::Filter(_filter_type, fc);
+        }
+        else {
+            filter = new dsptb::Filter(_filter_type, fc, upperFc);
+        }
+        const int len = filter->getKernelSize();
+        const std::vector<float>& kernel = filter->getKernel();
+        memcpy(outFilterData, kernel.data(), sizeof(float) * len);
+        delete filter;
+
+        return DSPTB_SUCCESS;
+    }
+
+    int dsptbGetMonoauralIR(const float **data, int *len)
+    {
         if (!dsptb::dsptbInitOK) {
             DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbGetIR.");
             return DSPTB_FAILURE;
@@ -219,22 +254,32 @@ extern "C" {
         return DSPTB_SUCCESS;
     }
 
+    int dsptbSetFIRtoBlockProcessing(int blockProcessingObject, float* leftIR, float* rightIR) {
+        dsptb::blockProcessingObjects[blockProcessingObject]->setIRData(leftIR, rightIR);
+        return DSPTB_SUCCESS;
+    }
+
     int dsptbLoadHRTF(const char* path) {
         if (!dsptb::dsptbInitOK) {
             DSPTB_ERROR("DSPTB not initialised correctly. Aborting dsptbLoadHRTF.");
             return DSPTB_FAILURE;
         }
 
-        std::unique_ptr<dsptb::HRTF> newHrtf = std::unique_ptr<dsptb::HRTF>(new dsptb::HRTF(path));
+        dsptb::HRTF* newHrtf = new dsptb::HRTF(path);
         if (newHrtf->load() == DSPTB_FAILURE) {
+            delete newHrtf;
             return DSPTB_FAILURE;
         }
-        dsptb::hrtfObjects.push_back(newHrtf);
+        dsptb::hrtfObjects.emplace_back(newHrtf);
         return dsptb::hrtfObjects.size() - 1;
     }
 
     int dsptbSetHRTFToBlockProcessing(int hrtfObject, int blockProcessingObject, float x, float y, float z) {
-        dsptb::hrtfObjects[hrtfObject]->setFiltersToOverlapAdd(*dsptb::blockProcessingObjects[blockProcessingObject], x, y, z);
+        return dsptb::hrtfObjects[hrtfObject]->setFiltersToOverlapAdd(*dsptb::blockProcessingObjects[blockProcessingObject], x, y, z);
+    }
+
+    int dsptbGetHRTFFilterLength(int hrtfObject) {
+        return dsptb::hrtfObjects[hrtfObject]->getFilterLength();
     }
 
 } 

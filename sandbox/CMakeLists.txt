@@ -11,7 +11,7 @@ target_include_directories(sandbox PRIVATE "${DSPTB_EXTERN_DIR}/libmysofa/src/hr
 target_link_libraries(sandbox PRIVATE dsptb)
 target_link_libraries(sandbox PRIVATE mysofa-static)
 target_link_libraries(sandbox PRIVATE zlib)
-# target_link_libraries(sandbox PRIVATE sndfile)
+target_link_libraries(sandbox PRIVATE sndfile)
 
 # add_custom_command(TARGET asr POST_BUILD        # Adds a post-build event to MyTest
 #     COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."

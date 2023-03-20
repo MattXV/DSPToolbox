@@ -34,6 +34,10 @@ enum DSPTB_ERB_BAND {
     F_125, F_250, F_500, F_1000, F_2000, F_4000
 };
 
+enum DSPTB_FILTER_TYPE {
+    LPF, HPF, BPF
+};
+
 EXPORT int dsptbInit(dsptbSETTINGS* settings);
 EXPORT void dsptbQuit();
 
@@ -87,6 +91,11 @@ EXPORT int dsptbInitBlockProcessing(int blockLength, int irLength, int channels)
 EXPORT int dsptbProcessBlock(int blockProcessingObject, float* data);
 
 /**
+ * Set FIR filters to processing block object
+**/
+EXPORT int dsptbSetFIRtoBlockProcessing(int blockProcessingObject, float* leftIR, float* rightIR);
+
+/**
  * HRTF loader via libmysofa
 **/
 EXPORT int dsptbLoadHRTF(const char* path);
@@ -95,11 +104,17 @@ EXPORT int dsptbLoadHRTF(const char* path);
  * Use the blockProcessingObject ID to set HRTF to OverlapAdd objects
 **/
 EXPORT int dsptbSetHRTFToBlockProcessing(int hrtfObject, int blockProcessingObject, float x, float y, float z);
-
+/**
+ * Get HRTF Filter length
+**/
+EXPORT int dsptbGetHRTFFilterLength(int hrtfObject);
 
 EXPORT int dsptbGetGeneratedDiracSequence(const float** data, int* len, DSPTB_ERB_BAND band);
 
 EXPORT int dsptbGetIRComponent(const float** data, int* len, DSPTB_ERB_BAND band);
+
+
+EXPORT int dsptbDesignFilter(DSPTB_FILTER_TYPE filterType, float fc, float upperFc, float* outFilterData);
 
 #ifdef __cplusplus
 }      // extern "C"

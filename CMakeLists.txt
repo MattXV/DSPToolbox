@@ -24,13 +24,13 @@ include(ExternalProject)
 include(extern/pffft.cmake)
 
 
-# add_subdirectory(${DSPTB_EXTERN_DIR}/libsndfile)
+add_subdirectory(${DSPTB_EXTERN_DIR}/libsndfile)
 add_subdirectory(${DSPTB_EXTERN_DIR}/zlib)
 add_subdirectory(${DSPTB_EXTERN_DIR}/libmysofa)
 
 
-# set_target_properties(sndfile PROPERTIES BUILD_EXAMPLES OFF)
-# set_target_properties(sndfile PROPERTIES BUILD_SHARED_LIBS ON)
+set_target_properties(sndfile PROPERTIES BUILD_EXAMPLES OFF)
+set_target_properties(sndfile PROPERTIES BUILD_SHARED_LIBS ON)
 
 project(dsptb VERSION 1.0
 DESCRIPTION "DSP Toolbox"

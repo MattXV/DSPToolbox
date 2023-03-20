@@ -25,6 +25,8 @@ list(APPEND
 add_library(dsptb SHARED ${SOURCES})
 target_link_libraries(dsptb PRIVATE pffft)
 target_link_libraries(dsptb PRIVATE mysofa-static)
+target_link_libraries(dsptb PRIVATE zlib)
+target_include_directories(dsptb PRIVATE "${DSPTB_EXTERN_DIR}/libmysofa/src/hrtf")
 target_sources(dsptb PUBLIC ${HEADERS})
 
 set_target_properties(dsptb
