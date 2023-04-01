@@ -24,4 +24,4 @@ I'm working on this in my spare time, slowly writing unit tests and error-handli
 
 ## Contacts
 - [mattia.clmb@gmail.com](mailto:mattia.clmb@gmail.com)
-- [About me](mattxv.github.io)
+- [About me](https://mattxv.github.io)
