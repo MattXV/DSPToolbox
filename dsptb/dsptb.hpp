@@ -6,18 +6,19 @@
 #include "ir.hpp"
 #include "processing.hpp"
 #include <memory>
-#include <vector>
 #include <string>
 #include <cstring>
 #include <sstream>
-#include <array>
+#include <map>
 
 
 namespace dsptb {
     std::unique_ptr<FilterBank> filterBank;
     
-    std::vector<std::unique_ptr<OverlapAdd>> blockProcessingObjects;
-    std::vector<std::unique_ptr<HRTF>> hrtfObjects;
+    std::map<int, std::unique_ptr<OverlapAdd>> blockProcessingObjects;
+    int blockProcessingCounter = 0;
+    std::map<int, std::unique_ptr<HRTF>> hrtfObjects;
+    int hrtfCounter = 0;
 
     // Data
     signal outConvolution;

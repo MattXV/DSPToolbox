@@ -132,8 +132,8 @@ int main(int argc, const char* argv[]) {
         }
     }
 
-    dsptbQuit();
     std::cout << "done" << std::endl;
     */
+    dsptbQuit();
     return 0;
 }

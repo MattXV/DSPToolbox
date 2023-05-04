@@ -7,6 +7,7 @@ namespace dsptb {
         prepare();
     }
     void OverlapAdd::prepare() {
+        assert(channels == 2);
         // ir = std::vector<float>(1024, float(0));
         // ir[1] = 1.0f;
         
@@ -72,25 +73,25 @@ namespace dsptb {
         }
         pffft_transform(fft_setup, fftInL, fftInL, fftWorkspace, pffft_direction_t::PFFFT_FORWARD);
         pffft_transform(fft_setup, fftInR, fftInR, fftWorkspace, pffft_direction_t::PFFFT_FORWARD);
-        pffft_zconvolve_accumulate(fft_setup, fftInL, fftIrL, fftOutL, 1.0f);
-        pffft_zconvolve_accumulate(fft_setup, fftInR, fftIrR, fftOutR, 1.0f);
+        pffft_zconvolve_accumulate(fft_setup, fftInL, fftIrL, fftOutL, 1.0f / (float)fft_length);
+        pffft_zconvolve_accumulate(fft_setup, fftInR, fftIrR, fftOutR, 1.0f / (float)fft_length);
         pffft_transform(fft_setup, fftOutL, fftOutL, fftWorkspace, pffft_direction_t::PFFFT_BACKWARD);
         pffft_transform(fft_setup, fftOutR, fftOutR, fftWorkspace, pffft_direction_t::PFFFT_BACKWARD);
         previousResultsL.emplace_back(fftOutL, fftOutL + fft_length);
         previousResultsR.emplace_back(fftOutR, fftOutR + fft_length);
 
-        for (std::deque<float>& previousResult : previousResultsL) {
-            for (int sample = 0; !previousResult.empty() && sample < block_length; sample++) {
-                block[sample* channels] += previousResult.front() / (float)fft_length;
-                previousResult.pop_front();
+
+
+        for (std::list<std::deque<float>>::iterator l = previousResultsL.begin(), r = previousResultsR.begin();
+            l != previousResultsL.end(); l++, r++) {
+            for (int sample = 0; !(*l).empty() && sample < block_length; sample++) {
+                block[sample * 2] += (*l).front();
+                block[sample * 2 + 1] += (*r).front();
+                (*l).pop_front();
+                (*r).pop_front();
             }
         }
-        for (std::deque<float>& previousResult : previousResultsR) {
-            for (int sample = 0; !previousResult.empty() && sample < block_length; sample++) {
-                block[sample * channels + 1] += previousResult.front() / (float)fft_length;
-                previousResult.pop_front();
-            }
-        }
+
         previousResultsL.remove_if(emptyResults);
         previousResultsR.remove_if(emptyResults);
     }

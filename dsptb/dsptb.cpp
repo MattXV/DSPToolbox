@@ -51,6 +51,9 @@ extern "C" {
         dsptb::filterBank.reset();
         dsptb::hrtfObjects.clear();
         dsptb::blockProcessingObjects.clear();
+        dsptb::hrtfObjects.clear();
+        dsptb::blockProcessingCounter = 0;
+        dsptb::hrtfCounter = 0;
     }
 
     const char* dsptbGetError(void) {
@@ -244,9 +247,10 @@ extern "C" {
             return DSPTB_FAILURE; 
         }
 
-        dsptb::blockProcessingObjects.emplace_back(new dsptb::OverlapAdd(blockLength, irLength, channels));
         
-        return dsptb::blockProcessingObjects.size() - 1;
+        dsptb::blockProcessingObjects.emplace(++dsptb::blockProcessingCounter, new dsptb::OverlapAdd(blockLength, irLength, channels));
+        
+        return dsptb::blockProcessingCounter;
     }
 
     int dsptbProcessBlock(int blockProcessingObject, float* data) {
@@ -270,8 +274,9 @@ extern "C" {
             delete newHrtf;
             return DSPTB_FAILURE;
         }
-        dsptb::hrtfObjects.emplace_back(newHrtf);
-        return dsptb::hrtfObjects.size() - 1;
+        
+        dsptb::hrtfObjects.emplace(++dsptb::hrtfCounter, newHrtf);
+        return dsptb::hrtfCounter;
     }
 
     int dsptbSetHRTFToBlockProcessing(int hrtfObject, int blockProcessingObject, float x, float y, float z) {
